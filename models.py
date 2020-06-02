@@ -9,12 +9,12 @@ import json
 # else:
 #   database_path = os.environ['DATABASE_URL']
 
-#database_path = os.environ['DATABASE_URL']
-database_path = os.environ.get('DATABASE_URL')
-if not database_path:
-    database_name = "capstone"
-    database_path = "postgres://{}/{}".format(
-        'eva@localhost:5432', database_name)
+database_path = os.environ['DATABASE_URL']
+# database_path = os.environ.get('DATABASE_URL')
+# if not database_path:
+#     database_name = "capstone"
+#     database_path = "postgres://{}/{}".format(
+#         'localhost:5432', database_name)
 
 db = SQLAlchemy()
 
