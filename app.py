@@ -3,7 +3,7 @@ from flask_cors import CORS
 from flask import Flask, jsonify, abort, request
 from models import setup_db, Actors, Movies
 
-from .auth.auth import AuthError, requires_auth
+from auth import AuthError, requires_auth
 
 
 def create_app(test_config=None):
@@ -21,8 +21,10 @@ def create_app(test_config=None):
             greeting = greeting + "!!!!!"
         return greeting
 
+    # list of actors
     @app.route('/actors', methods=['GET'])
-    @requires_auth(permission='view:actors')
+    # @requires_auth(permission='view:actors')
+    # def get_actors(payload):
     def get_actors():
         all_actors = Actors.query.all()
         return jsonify({
@@ -30,8 +32,10 @@ def create_app(test_config=None):
             'actors': all_actors
         })
 
+    # list of movies
     @app.route('/movies', methods=['GET'])
-    @requires_auth(permission='view:movies')
+    # @requires_auth(permission='view:movies')
+    # def get_movies(payload):
     def get_movies():
         all_movies = Movies.query.all()
         return jsonify({
@@ -39,9 +43,10 @@ def create_app(test_config=None):
             'movies': all_movies
         })
 
+    # delete individual actors
     @app.route('/actors/<int:id>', methods=['DELETE'])
     @requires_auth(permission='delete:actors')
-    def delete_actor(id):
+    def delete_actor(payload, id):
         try:
             actor = Actors.query.filter(Actors.id == id).one_or_none()
 
@@ -58,9 +63,10 @@ def create_app(test_config=None):
         except:
             abort(422)
 
+    # delete individual movies
     @app.route('/movies/<int:id>', methods=['DELETE'])
     @requires_auth(permission='delete:movies')
-    def delete_movie(id):
+    def delete_movie(payload, id):
         try:
             movie = Movies.query.filter(Movies.id == id).one_or_none()
 
@@ -77,9 +83,10 @@ def create_app(test_config=None):
         except:
             abort(422)
 
+    # add new actors
     @app.route('/actors', methods=['POST'])
     @requires_auth(permission='add:actors')
-    def add_actors():
+    def add_actors(payload):
         body = request.get_json()
         new_name = body.get('name', None)
         new_age = body.get('age', None)
@@ -97,9 +104,10 @@ def create_app(test_config=None):
         except:
             abort(422)
 
+    # add new movies
     @app.route('/movies', methods=['POST'])
     @requires_auth(permission='add:movies')
-    def add_movies():
+    def add_movies(payload):
         body = request.get_json()
         new_title = body.get('title', None)
         new_release_date = body.get('release_date', None)
@@ -116,9 +124,10 @@ def create_app(test_config=None):
         except:
             abort(422)
 
+    # update existing actors
     @app.route('/actors/<int:id>', methods=['PATCH'])
     @requires_auth(permission='update:actors')
-    def update_actors(id):
+    def update_actors(payload, id):
         body = request.get_json()
         new_name = body.get('name', None)
         new_age = body.get('age', None)
@@ -147,9 +156,10 @@ def create_app(test_config=None):
         except:
             abort(422)
 
+    # update existing movies
     @app.route('/movies/<int:id>', methods=['PATCH'])
     @requires_auth(permission='update:movies')
-    def update_movies(id):
+    def update_movies(payload, id):
         body = request.get_json()
         new_title = body.get('title', None)
         new_release_date = body.get('release_date', None)
@@ -174,17 +184,6 @@ def create_app(test_config=None):
             abort(422)
 
     return app
-
-# add permissions to endpoints
-# Casting Assistant
-# - Can view actors and movies
-# Casting Director
-# - All permissions a Casting Assistant has and…
-# - Add or delete an actor from the database
-# - Modify actors or movies
-# Executive Producer
-# - All permissions a Casting Director has and…
-# - Add or delete a movie from the database
 
 
 app = create_app()
