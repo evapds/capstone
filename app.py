@@ -17,9 +17,9 @@ def create_app(test_config=None):
     def get_greeting():
         # excited = os.environ['EXCITED']
         excited = os.environ.get('EXCITED')
-        greeting = "Hello"
+        greeting = "Hello and welcome to my capstone project!"
         if excited == 'true':
-            greeting = greeting + "!!!!!"
+            greeting = greeting + "I am very excited that I have come this far!"
         return greeting
 
     # list of actors
@@ -129,12 +129,12 @@ def create_app(test_config=None):
     @app.route('/actors/<int:id>', methods=['PATCH'])
     @requires_auth(permission='update:actors')
     def update_actors(payload, id):
-        body = request.get_json()
-        new_name = body.get('name', None)
-        new_age = body.get('age', None)
-        new_gender = body.get('gender', None)
-
         try:
+            body = request.get_json()
+            new_name = body.get('name', None)
+            new_age = body.get('age', None)
+            new_gender = body.get('gender', None)
+
             actor = Actors.query.filter(Actors.id == id).one_or_none()
 
             if actor is None:
@@ -157,17 +157,17 @@ def create_app(test_config=None):
             except:
                 abort(422)
         except:
-            abort(422)
+            abort(400)
 
     # update existing movies
     @app.route('/movies/<int:id>', methods=['PATCH'])
     @requires_auth(permission='update:movies')
     def update_movies(payload, id):
-        body = request.get_json()
-        new_title = body.get('title', None)
-        new_release_date = body.get('release_date', None)
-
         try:
+            body = request.get_json()
+            new_title = body.get('title', None)
+            new_release_date = body.get('release_date', None)
+
             movie = Movies.query.filter(Movies.id == id).one_or_none()
             if movie is None:
                 abort(404)
@@ -188,7 +188,56 @@ def create_app(test_config=None):
             }
             return jsonify(result)
         except:
-            abort(422)
+            abort(400)
+
+    # Errorhandler
+    @app.errorhandler(400)
+    def bad_request(error):
+        return jsonify({
+            'success': False,
+            'error': 400,
+            'message': 'Bad request'
+        }), 400
+
+    @app.errorhandler(401)
+    def unauthorized(error):
+        return jsonify({
+            'success': False,
+            'error': 401,
+            'message': 'Permission not found'
+        }), 401
+
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({
+            'success': False,
+            'error': 404,
+            'message': 'Not found'
+        }), 404
+
+    @app.errorhandler(422)
+    def unprocessable(error):
+        return jsonify({
+            'success': False,
+            'error': 422,
+            'message': 'Unprocessable'
+        }), 422
+
+    @app.errorhandler(500)
+    def internal_server_error(error):
+        return jsonify({
+            'success': False,
+            'error': 500,
+            'message': 'Internal Server Error'
+        }), 500
+
+    @app.errorhandler(AuthError)
+    def handle_auth_error(ex):
+        return jsonify({
+            'success': False,
+            'error': ex.status_code,
+            'message': ex.error['code']
+        }), 401
 
     return app
 
@@ -197,57 +246,3 @@ app = create_app()
 
 if __name__ == '__main__':
     app.run()
-
-# Errorhandler
-@app.errorhandler(400)
-def bad_request(error):
-    return jsonify({
-        'success': False,
-        'error': 400,
-        'message': 'Bad request'
-    }), 400
-
-
-@app.errorhandler(401)
-def unauthorized(error):
-    return jsonify({
-        'success': False,
-        'error': 401,
-        'message': 'Permission not found'
-    }), 401
-
-
-@app.errorhandler(404)
-def not_found(error):
-    return jsonify({
-        'success': False,
-        'error': 404,
-        'message': 'Not found'
-    }), 404
-
-
-@app.errorhandler(422)
-def unprocessable(error):
-    return jsonify({
-        'success': False,
-        'error': 422,
-        'message': 'Unprocessable'
-    }), 422
-
-
-@app.errorhandler(500)
-def internal_server_error(error):
-    return jsonify({
-        'success': False,
-        'error': 500,
-        'message': 'Internal Server Error'
-    }), 500
-
-
-@app.errorhandler(AuthError)
-def handle_auth_error(ex):
-    return jsonify({
-        'success': False,
-        'error': ex.status_code,
-        'message': ex.error['code']
-    }), 401
