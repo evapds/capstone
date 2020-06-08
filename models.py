@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timezone
+# from datetime import datetime, timezone
 from sqlalchemy import Column, String, create_engine, Integer
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -12,11 +12,13 @@ import sys
 #   database_path = os.environ['DATABASE_URL']
 
 # database_path = os.environ['DATABASE_URL']
-database_path = os.environ.get('DATABASE_URL')
+# database_path = os.environ.get('DATABASE_URL')
 # if not database_path:
 #     database_name = "capstone"
 #     database_path = "postgres://{}/{}".format(
 #         'localhost:5432', database_name)
+database_name = "capstone"
+database_path = "postgres://{}/{}".format('localhost:5432', database_name)
 
 db = SQLAlchemy()
 
@@ -47,7 +49,7 @@ class Movies(db.Model):
         self.title = title
         self.release_date = release_date
 
-    def inser(self):
+    def insert(self):
         db.session.add(self)
         db.session.commit()
 
@@ -78,7 +80,7 @@ class Actors(db.Model):
         self.age = age
         self.gender = gender
 
-    def inser(self):
+    def insert(self):
         db.session.add(self)
         db.session.commit()
 

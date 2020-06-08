@@ -1,8 +1,9 @@
 import os
 from flask_cors import CORS
 from flask import Flask, jsonify, abort, request
-from models import setup_db, Actors, Movies
+from flask_sqlalchemy import SQLAlchemy
 
+from models import setup_db, Actors, Movies
 from auth import AuthError, requires_auth
 
 
@@ -23,24 +24,24 @@ def create_app(test_config=None):
 
     # list of actors
     @app.route('/actors', methods=['GET'])
-    # @requires_auth(permission='view:actors')
-    # def get_actors(payload):
-    def get_actors():
+    @requires_auth(permission='view:actors')
+    def get_actors(payload):
         all_actors = Actors.query.all()
+        actors = [actor.format() for actor in all_actors]
         return jsonify({
             'success': True,
-            'actors': all_actors
+            'actors': actors
         })
 
     # list of movies
     @app.route('/movies', methods=['GET'])
-    # @requires_auth(permission='view:movies')
-    # def get_movies(payload):
-    def get_movies():
+    @requires_auth(permission='view:movies')
+    def get_movies(payload):
         all_movies = Movies.query.all()
+        movies = [movie.format() for movie in all_movies]
         return jsonify({
             'success': True,
-            'movies': all_movies
+            'movies': movies
         })
 
     # delete individual actors
@@ -93,12 +94,13 @@ def create_app(test_config=None):
         new_gender = body.get('gender', None)
 
         try:
-            actors = Actors(name=new_name, age=new_age, gender=new_gender)
-            actors.insert()
+            actor = Actors(name=new_name, age=new_age, gender=new_gender)
+            actor.insert()
 
             result = {
                 'success': True,
-                'actors': actors
+                'created': actor.id,
+                'actors': actor
             }
             return jsonify(result)
         except:
@@ -118,6 +120,7 @@ def create_app(test_config=None):
 
             result = {
                 'success': True,
+                'created': movies.id,
                 'movies': movies
             }
             return jsonify(result)
@@ -139,14 +142,8 @@ def create_app(test_config=None):
             if actor is None:
                 abort(404)
 
-            actor_name = Actors(name=new_name)
-            actor_name.update()
-
-            actor_age = Actors(age=new_age)
-            actor_age.update()
-
-            actor_gender = Actors(gender=new_gender)
-            actor_gender.update()
+            actor = Actors(name=new_name, age=new_age, gender=new_gender)
+            actor.update()
 
             result = {
                 'success': True,
@@ -206,7 +203,7 @@ def unauthorized(error):
     return jsonify({
         'success': False,
         'error': 401,
-        'message': 'Unauthorized'
+        'message': 'Permission not found'
     }), 401
 
 
