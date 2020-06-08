@@ -99,8 +99,7 @@ def create_app(test_config=None):
 
             result = {
                 'success': True,
-                'created': actor.id,
-                'actors': actor
+                'created': actor.id
             }
             return jsonify(result)
         except:
@@ -120,8 +119,7 @@ def create_app(test_config=None):
 
             result = {
                 'success': True,
-                'created': movies.id,
-                'movies': movies
+                'created': movies.id
             }
             return jsonify(result)
         except:
@@ -142,14 +140,22 @@ def create_app(test_config=None):
             if actor is None:
                 abort(404)
 
-            actor = Actors(name=new_name, age=new_age, gender=new_gender)
-            actor.update()
+            try:
+                if new_name:
+                    actor.name = new_name
+                if new_age:
+                    actor.age = new_age
+                if new_gender:
+                    actor.gender = new_gender
+                actor.update()
 
-            result = {
-                'success': True,
-                'actors': actor
-            }
-            return jsonify(result)
+                result = {
+                    'success': True,
+                    'actors': [actor.format()]
+                }
+                return jsonify(result)
+            except:
+                abort(422)
         except:
             abort(422)
 
@@ -166,15 +172,19 @@ def create_app(test_config=None):
             if movie is None:
                 abort(404)
 
-            movie.title = new_title
-            movie.title.update()
+            try:
+                if new_title:
+                    movie.title = new_title
+                if new_release_date:
+                    movie.release_date = new_release_date
+                movie.update()
 
-            movie.release_date = new_release_date
-            movie.release_date.update()
+            except:
+                abort(422)
 
             result = {
                 'success': True,
-                'movie': movie
+                'movies': [movie.format()]
             }
             return jsonify(result)
         except:
